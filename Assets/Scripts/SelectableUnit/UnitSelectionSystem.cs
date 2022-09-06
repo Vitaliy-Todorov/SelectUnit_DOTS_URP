@@ -12,7 +12,6 @@ namespace Assets.Scripts.SelectableUnit
     public partial class UnitSelectionSystem : SystemBase
     {
         private Camera _mainCamera;
-        private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
         private BuildPhysicsWorld _buildPhysicsWorld;
         private CollisionWorld _collisionWorld;
         private Entity _selectionEntity;
@@ -26,7 +25,6 @@ namespace Assets.Scripts.SelectableUnit
         protected override void OnUpdate()
         {
             _selectionEntity = GetSingleton<SelectionUIPrefabComponent>().Value;
-            _endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
 
             if (Input.GetMouseButtonDown(0))
                 SelectedSinglUnit();
@@ -43,13 +41,11 @@ namespace Assets.Scripts.SelectableUnit
             if (Raycast(rayStart, rayEnd, out RaycastHit raycastHit))
             {
                 Entity hitEntity = _buildPhysicsWorld.PhysicsWorld.Bodies[raycastHit.RigidBodyIndex].Entity;
-                Entity selectionEntity = _selectionEntity;
-                EntityCommandBuffer ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
 
                 if (HasComponent<SelectedEntityComponent>(hitEntity))
-                    DestroySelection(hitEntity, ecb);
+                    DestroySelection(hitEntity);
                 else
-                    SetSelection(hitEntity, ecb);
+                    SetSelection(hitEntity);
             }
         }
 
@@ -71,21 +67,21 @@ namespace Assets.Scripts.SelectableUnit
             return _collisionWorld.CastRay(raycastInput, out raycastHit);
         }
 
-        private void SetSelection(Entity entity, EntityCommandBuffer ecb)
+        private void SetSelection(Entity entity)
         {
-            ecb.AddComponent<SelectedEntityComponent>(entity);
+            EntityManager.AddComponent<SelectedEntityComponent>(entity);
 
-            Entity selection = ecb.Instantiate(_selectionEntity);
+            Entity selection = EntityManager.Instantiate(_selectionEntity);
             SelectedEntityComponent selectedEntityComponent = new SelectedEntityComponent { SelectionEntity = selection };
 
-            ecb.SetComponent(entity, selectedEntityComponent);
+            EntityManager.SetComponentData(entity, selectedEntityComponent);
         }
 
-        private void DestroySelection(Entity entity, EntityCommandBuffer ecb)
+        private void DestroySelection(Entity entity)
         {
             SelectedEntityComponent selectionStateData = EntityManager.GetComponentData<SelectedEntityComponent>(entity);
-            ecb.DestroyEntity(selectionStateData.SelectionEntity);
-            ecb.RemoveComponent<SelectedEntityComponent>(entity);
+            EntityManager.DestroyEntity(selectionStateData.SelectionEntity);
+            EntityManager.RemoveComponent<SelectedEntityComponent>(entity);
 
         }
     }
