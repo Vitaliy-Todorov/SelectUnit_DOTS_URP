@@ -4,14 +4,14 @@ using UnityEngine;
 namespace Assets.Scripts.SelectableUnit
 {
     [GenerateAuthoringComponent]
-    internal struct SelectableEntityTag : IComponentData
+    internal struct SelectedEntityComponent : IComponentData
     {
-        public Entity Entity { get; set; }
+        public Entity SelectionEntity;
 
-        public void Log(Entity entity)
+        /*public void Log(Entity entity)
         {
-            Entity = entity;
+            SelectionEntity = entity;
             Debug.Log($"Entity with tag: ({entity.Index}, {entity.Version})");
-        }
+        }*/
     }
 }

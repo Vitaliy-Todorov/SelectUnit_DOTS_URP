@@ -4,7 +4,8 @@ using System;
 public enum CollisionLayers
 {
     None = 0,
-    Selection = None << 1,
-    Ground = Selection << 1,
+    Defolt = 1,
+    Ground = Defolt << 1,
     Unit = Ground << 1,
+    Selection = Unit << 1,
 }
