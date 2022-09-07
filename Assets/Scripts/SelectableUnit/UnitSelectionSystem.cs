@@ -7,6 +7,8 @@ using RaycastHit = Unity.Physics.RaycastHit;
 using Ray = UnityEngine.Ray;
 using Unity.Transforms;
 using Assets.Scripts.Move;
+using ParallelWriter = Unity.Entities.EntityCommandBuffer.ParallelWriter;
+using System;
 
 namespace Assets.Scripts.SelectableUnit
 {
@@ -28,14 +30,28 @@ namespace Assets.Scripts.SelectableUnit
 
         protected override void OnUpdate()
         {
+            var ecbBeginInitialization = _BeginInitializationEcbSystem.CreateCommandBuffer().AsParallelWriter();
+
             if (Input.GetMouseButtonDown(0))
-                SelectedSinglUnit();
+            {
+                if (!Input.GetKey(KeyCode.LeftShift))
+                    DestroySelectionAll(ecbBeginInitialization);
+
+                SelectedSinglUnit(ecbBeginInitialization);
+            }
         }
 
-        private void SelectedSinglUnit()
+        private void DestroySelectionAll(ParallelWriter ecbBeginInitialization)
         {
-            var ecbBeginInitialization = _BeginInitializationEcbSystem.CreateCommandBuffer().AsParallelWriter();
-            CollisionWorld collisionWorld = _buildPhysicsWorld.PhysicsWorld.CollisionWorld;
+            EntityManager entityManager = EntityManager;
+            Entities.ForEach((Entity selectedEntity, ref SelectedEntityComponent selectedEntityComponent) => {
+                DestroySelection(selectedEntity, selectedEntityComponent, ecbBeginInitialization);
+            }).Run();
+        }
+
+        private void SelectedSinglUnit(ParallelWriter ecbBeginInitialization)
+        {
+            CollisionWorld  collisionWorld = _buildPhysicsWorld.PhysicsWorld.CollisionWorld;
 
             Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
             float3 rayStart = ray.origin;
@@ -46,7 +62,10 @@ namespace Assets.Scripts.SelectableUnit
                 Entity hitEntity = _buildPhysicsWorld.PhysicsWorld.Bodies[raycastHit.RigidBodyIndex].Entity;
 
                 if (HasComponent<SelectedEntityComponent>(hitEntity))
-                    DestroySelection(hitEntity);
+                {
+                    SelectedEntityComponent selectionStateData = EntityManager.GetComponentData<SelectedEntityComponent>(hitEntity);
+                    DestroySelection(hitEntity, selectionStateData, ecbBeginInitialization);
+                }
                 else
                     SetSelection(hitEntity, ecbBeginInitialization);
             }
@@ -70,7 +89,7 @@ namespace Assets.Scripts.SelectableUnit
             return collisionWorld.CastRay(raycastInput, out raycastHit);
         }
 
-        private void SetSelection(Entity entity, EntityCommandBuffer.ParallelWriter ecbBeginInitialization)
+        private void SetSelection(Entity entity, ParallelWriter ecbBeginInitialization)
         {
 
             Entity selection = ecbBeginInitialization.Instantiate(entity.Index, _selectionEntity);
@@ -84,12 +103,11 @@ namespace Assets.Scripts.SelectableUnit
             ecbBeginInitialization.SetComponent(entity.Index, selection, new Translation { Value = new float3(0, -.49f, 0)});
         }
 
-        private void DestroySelection(Entity entity)
+        private static void DestroySelection(Entity entity, SelectedEntityComponent selectionStateData, ParallelWriter ecbBeginInitialization)
         {
-            SelectedEntityComponent selectionStateData = EntityManager.GetComponentData<SelectedEntityComponent>(entity);
-            EntityManager.DestroyEntity(selectionStateData.SelectionEntity);
-            EntityManager.RemoveComponent<SelectedEntityComponent>(entity);
-            EntityManager.RemoveComponent<MoveComponent>(entity);
+            ecbBeginInitialization.DestroyEntity(entity.Index, selectionStateData.SelectionEntity);
+            ecbBeginInitialization.RemoveComponent<SelectedEntityComponent>(entity.Index, entity);
+            ecbBeginInitialization.RemoveComponent<MoveComponent>(entity.Index, entity);
         }
     }
 }
