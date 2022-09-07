@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Services.InputServices;
+﻿using Assets.Scripts.Services;
+using Assets.Scripts.Services.InputServices;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -11,7 +12,7 @@ namespace Assets.Scripts.Move
 
         protected override void OnStartRunning()
         {
-            _inputKeyboardMouseService = new InputKeyboardMouseService();
+            _inputKeyboardMouseService = AllServices.Container.Single<InputKeyboardMouseService>();
         }
 
         protected override void OnUpdate()
