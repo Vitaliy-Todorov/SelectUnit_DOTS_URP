@@ -7,11 +7,5 @@ namespace Assets.Scripts.SelectableUnit
     internal struct SelectedEntityComponent : IComponentData
     {
         public Entity SelectionEntity;
-
-        /*public void Log(Entity entity)
-        {
-            SelectionEntity = entity;
-            Debug.Log($"Entity with tag: ({entity.Index}, {entity.Version})");
-        }*/
     }
 }

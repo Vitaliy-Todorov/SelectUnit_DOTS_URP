@@ -1,7 +1,7 @@
 using System;
 
 [Flags]
-public enum CollisionLayers
+public enum ECollisionLayers
 {
     None = 0,
     Defolt = 1,
