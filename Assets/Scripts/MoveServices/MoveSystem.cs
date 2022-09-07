@@ -1,8 +1,7 @@
-﻿using Assets.Scripts.InputServices;
+﻿using Assets.Scripts.Services.InputServices;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace Assets.Scripts.Move
 {
