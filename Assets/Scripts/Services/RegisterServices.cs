@@ -1,13 +1,19 @@
 ﻿using Assets.Scripts.Services.InputServices;
+using System;
 using UnityEngine;
 
 namespace Assets.Scripts.Services
 {
     public class RegisterServices : MonoBehaviour
     {
+        private AllServices _containerServices = AllServices.Container;
+
         private void Awake()
         {
-            AllServices.Container.RegisterSingle(new InputKeyboardMouseService());
+            _containerServices.RegisterSingle(InputKeyboardMouseService());
         }
+
+        private InputKeyboardMouseService InputKeyboardMouseService() => 
+            gameObject.AddComponent<InputKeyboardMouseService>();
     }
 }
