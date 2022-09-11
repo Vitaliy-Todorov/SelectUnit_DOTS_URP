@@ -3,10 +3,13 @@ using UnityEngine;
 
 namespace Assets.Scripts.Services.InputServices
 {
-    public class InputKeyboardMouseService : IService
+    public class InputKeyboardMouseService : MonoBehaviour, IService
     {
         private readonly string _vertical = "Vertical";
         private readonly string _horizontal = "Horizontal";
+
+        public Clicp _click = new Clicp();
+        public Clicp Click { get => _click; }
 
         public float3 Axis
         {
@@ -20,16 +23,35 @@ namespace Assets.Scripts.Services.InputServices
             }
         }
 
-        public bool Click
+        public Vector3 ClickPosition
         {
             get
             {
-                bool click = false;
+                return Input.mousePosition;
+            }
+        }
 
-                if (Input.GetMouseButton(0))
-                    click = false;
+        private void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Click.Active = true;
+                Click.StaryPosition = Input.mousePosition;
+            }
 
-                return click;
+            if (Input.GetMouseButtonUp(0))
+                Click.Active = true;
+            else
+            {
+                Click.Up = false;
+                Click.Active = false;
+            }
+
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                Click.Up = true;
+                Click.EndPosition = Input.mousePosition;
             }
         }
     }
