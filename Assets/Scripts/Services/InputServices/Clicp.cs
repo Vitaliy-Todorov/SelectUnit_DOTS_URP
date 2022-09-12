@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Services.InputServices
 {
-    public class Clicp
+    public class Click
     {
         public bool Active;
         public bool Up;

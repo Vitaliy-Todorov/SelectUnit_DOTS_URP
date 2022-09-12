@@ -2,7 +2,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using ParallelWriter = Unity.Entities.EntityCommandBuffer.ParallelWriter;
 
 namespace Assets.Scripts.SelectableUnit
 {
@@ -12,7 +11,6 @@ namespace Assets.Scripts.SelectableUnit
         private BeginInitializationEntityCommandBufferSystem _beginInitializationECDSystem;
         private EndSimulationEntityCommandBufferSystem _endSimulationECDSystem;
         private Entity _selectionEntity;
-        private ComponentDataFromEntity<SelectedEntityComponent> _selectedEntityComponentCDFE;
 
         protected override void OnStartRunning()
         {
@@ -53,16 +51,13 @@ namespace Assets.Scripts.SelectableUnit
             ecb.AddComponent(selection, new Parent { Value = entity });
             ecb.AddComponent(selection, new LocalToParent());
             ecb.SetComponent(selection, new Translation { Value = new float3(0, -.49f, 0) });
-            UnityEngine.Debug.Log($"SetSelection: {selectedEntityComponent.SelectionEntity.Index}.");
         }
 
         private void DestroySelection(Entity entity, SelectedEntityComponent selectionStateComponent, EntityCommandBuffer ecb)
         {
             ecb.DestroyEntity(selectionStateComponent.SelectionEntity);
-            //ecb.SetComponent(entity, selectionStateComponent);
             ecb.RemoveComponent<SelectedEntityComponent>(entity);
             ecb.RemoveComponent<MoveComponent>(entity);
-            UnityEngine.Debug.Log($"DestroySelection: {selectionStateComponent.SelectionEntity.Index} ------------------------------------------");
         }
     }
 }

@@ -12,12 +12,12 @@ using Unity.Jobs;
 namespace Assets.Scripts.SelectableUnit.SelectSeveralBordered
 {
     [AlwaysUpdateSystem]
-    public partial class SelectMultipleUnitsSystem : SystemBase
+    public partial class CreatePhysicsColliderForSelectMultipleUnitsSystem : SystemBase
     {
         private Camera _mainCamera;
         private BeginInitializationEntityCommandBufferSystem _beginInitializationECBSystem;
         private InputKeyboardMouseService _inputKeyboardMouseService;
-        private Clicp _click;
+        private Click _click;
         private EntityArchetype _physicsColliderForSelectionArchetype;
 
         /*private BuildPhysicsWorld _stepPhysicsWorld;*/
@@ -27,8 +27,8 @@ namespace Assets.Scripts.SelectableUnit.SelectSeveralBordered
         {
             base.OnCreate();
 
-            _beginInitializationECBSystem = World.GetOrCreateSystem<BeginInitializationEntityCommandBufferSystem>();
             _inputKeyboardMouseService = AllServices.Container.Single<InputKeyboardMouseService>();
+            _beginInitializationECBSystem = World.GetOrCreateSystem<BeginInitializationEntityCommandBufferSystem>();
 
             _mainCamera = Camera.main;
             _click = _inputKeyboardMouseService.Click;

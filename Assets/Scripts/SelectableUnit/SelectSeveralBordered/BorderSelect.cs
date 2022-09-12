@@ -4,20 +4,22 @@ using UnityEngine;
 
 namespace Assets.Scripts.SelectableUnit.SelectSeveralBordered
 {
-    public class SelectionManager : MonoBehaviour
+    public class BorderSelect : MonoBehaviour
     {
         private InputKeyboardMouseService _inputKeyboardMouseService;
+        private Click _click;
 
         private void Start()
         {
             _inputKeyboardMouseService = AllServices.Container.Single<InputKeyboardMouseService>();
+            _click = _inputKeyboardMouseService.Click;
         }
 
         private void OnGUI()
         {
-            if (_inputKeyboardMouseService.Click.Active)
+            if (_click.Active)
             {
-                var rect = SelectionGUI.GetScreenRect(_inputKeyboardMouseService.Click.StaryPosition, _inputKeyboardMouseService.Click.EndPosition);
+                var rect = SelectionGUI.GetScreenRect(_click.StaryPosition, _click.EndPosition);
                 SelectionGUI.DrawScreenRect(rect, new Color(0.8f, 0.8f, 0.95f, 0.1f));
                 SelectionGUI.DrawScreenRectBorder(rect, 1, Color.blue);
             }

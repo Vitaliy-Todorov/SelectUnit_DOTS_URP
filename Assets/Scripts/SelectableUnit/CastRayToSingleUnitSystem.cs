@@ -5,23 +5,32 @@ using Unity.Physics.Systems;
 using UnityEngine;
 using RaycastHit = Unity.Physics.RaycastHit;
 using Ray = UnityEngine.Ray;
+using Assets.Scripts.Services;
+using Assets.Scripts.Services.InputServices;
 
 namespace Assets.Scripts.SelectableUnit
 {
     [AlwaysUpdateSystem]
-    public partial class SelectSingleUnitSystem : SystemBase
+    public partial class CastRayToSingleUnitSystem : SystemBase
     {
-        private Camera _mainCamera;
+        private InputKeyboardMouseService _inputKeyboardMouseService;
         private BuildPhysicsWorld _buildPhysicsWorld;
         private BeginInitializationEntityCommandBufferSystem _beginInitializationECBSystem;
         private EndInitializationEntityCommandBufferSystem _endInitializationECBSystem;
+        private Click _click;
+        private Camera _mainCamera;
 
         protected override void OnStartRunning()
         {
-            _mainCamera = Camera.main;
+            base.OnCreate();
+
+            _inputKeyboardMouseService = AllServices.Container.Single<InputKeyboardMouseService>();
             _buildPhysicsWorld = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>();
             _beginInitializationECBSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BeginInitializationEntityCommandBufferSystem>();
             _endInitializationECBSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<EndInitializationEntityCommandBufferSystem>();
+
+            _mainCamera = Camera.main;
+            _click = _inputKeyboardMouseService.Click;
         }
 
         protected override void OnUpdate()
@@ -29,9 +38,9 @@ namespace Assets.Scripts.SelectableUnit
             var ecbBeginInitialization = _beginInitializationECBSystem.CreateCommandBuffer();
             var ecbEndInitialization = _endInitializationECBSystem.CreateCommandBuffer();
 
-            if (Input.GetMouseButtonDown(0))
+            if (_click.Up)
             {
-                if (!Input.GetKey(KeyCode.LeftShift))
+                if (!_inputKeyboardMouseService.Shift)
                     DestroySelectionAll(ecbEndInitialization);
 
                 CastRayAndSelection(ecbBeginInitialization);
@@ -42,7 +51,7 @@ namespace Assets.Scripts.SelectableUnit
         {
             CollisionWorld  collisionWorld = _buildPhysicsWorld.PhysicsWorld.CollisionWorld;
 
-            Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+            Ray ray = _mainCamera.ScreenPointToRay(_click.EndPosition);
             float3 rayStart = ray.origin;
             float3 rayEnd = ray.GetPoint(20);
 

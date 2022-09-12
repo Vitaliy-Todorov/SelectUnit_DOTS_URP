@@ -8,8 +8,8 @@ namespace Assets.Scripts.Services.InputServices
         private readonly string _vertical = "Vertical";
         private readonly string _horizontal = "Horizontal";
 
-        public Clicp _click = new Clicp();
-        public Clicp Click { get => _click; }
+        public Click _click = new Click();
+        public Click Click { get => _click; }
 
         public float3 Axis
         {
@@ -22,6 +22,9 @@ namespace Assets.Scripts.Services.InputServices
                 return axis;
             }
         }
+
+        public bool Shift =>
+            Input.GetKey(KeyCode.LeftShift);
 
         public Vector3 ClickPosition
         {
@@ -39,8 +42,11 @@ namespace Assets.Scripts.Services.InputServices
                 Click.StaryPosition = Input.mousePosition;
             }
 
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButton(0))
+            {
                 Click.Active = true;
+                Click.EndPosition = Input.mousePosition;
+            }
             else
             {
                 Click.Up = false;
